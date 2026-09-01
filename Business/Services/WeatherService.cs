@@ -84,6 +84,7 @@ public class WeatherService : IWeatherService
             catch (JsonException)
             {
                 // Unparseable error body
+                Console.WriteLine($"WeatherAPI returned an invalid or incomplete response structure for city: {city}");
             }
 
             if (response.StatusCode == HttpStatusCode.NotFound)
