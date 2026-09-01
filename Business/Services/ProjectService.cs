@@ -1,39 +1,103 @@
 using ASPProjects.Data.Repositories;
 using ASPProjects.Models.DTOs;
+using ASPProjects.Models.Entities;
 
 namespace ASPProjects.Business.Services;
 
 public class ProjectService : IProjectService
 {
     private readonly IProjectRepository _projectRepository;
+    private readonly IIdProtector _idProtector;
 
-    public ProjectService(IProjectRepository projectRepository)
+    public ProjectService(IProjectRepository projectRepository, IIdProtector idProtector)
     {
         _projectRepository = projectRepository;
+        _idProtector = idProtector;
     }
 
-    public Task<IEnumerable<ProjectDto>> GetAllProjectsAsync()
+    public async Task<IEnumerable<ProjectDto>> GetAllProjectsAsync()
     {
-        throw new NotImplementedException();
+        var projects = await _projectRepository.GetAllAsync();
+        return projects.Select(MapToDto);
     }
 
-    public Task<ProjectDto?> GetProjectByIdAsync(int id)
+    public async Task<ProjectDto?> GetProjectByIdAsync(string encryptedId)
     {
-        throw new NotImplementedException();
+        if (!_idProtector.TryDecode(encryptedId, out var id))
+        {
+            return null;
+        }
+
+        var project = await _projectRepository.GetByIdAsync(id);
+        return project == null ? null : MapToDto(project);
     }
 
-    public Task<ProjectDto> CreateProjectAsync(CreateProjectDto dto)
+    public async Task<ProjectDto> CreateProjectAsync(CreateProjectDto dto)
     {
-        throw new NotImplementedException();
+        var project = new Project
+        {
+            ProjectName = dto.ProjectName,
+            Description = dto.Description,
+            Status = dto.Status,
+            StartDate = dto.StartDate,
+            EndDate = dto.EndDate,
+            ProgressPercentage = dto.ProgressPercentage,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        var createdProject = await _projectRepository.AddAsync(project);
+        return MapToDto(createdProject);
     }
 
-    public Task<bool> UpdateProjectAsync(int id, UpdateProjectDto dto)
+    public async Task<ProjectDto?> UpdateProjectAsync(string encryptedId, UpdateProjectDto dto)
     {
-        throw new NotImplementedException();
+        if (!_idProtector.TryDecode(encryptedId, out var id))
+        {
+            return null;
+        }
+
+        var project = await _projectRepository.GetByIdAsync(id);
+        if (project == null)
+        {
+            return null;
+        }
+
+        project.ProjectName = dto.ProjectName;
+        project.Description = dto.Description;
+        project.Status = dto.Status;
+        project.StartDate = dto.StartDate;
+        project.EndDate = dto.EndDate;
+        project.ProgressPercentage = dto.ProgressPercentage;
+        project.UpdatedAt = DateTime.UtcNow;
+
+        await _projectRepository.UpdateAsync(project);
+        return MapToDto(project);
     }
 
-    public Task<bool> DeleteProjectAsync(int id)
+    public async Task<bool> DeleteProjectAsync(string encryptedId)
     {
-        throw new NotImplementedException();
+        if (!_idProtector.TryDecode(encryptedId, out var id))
+        {
+            return false;
+        }
+
+        return await _projectRepository.DeleteAsync(id);
+    }
+
+    private ProjectDto MapToDto(Project project)
+    {
+        return new ProjectDto
+        {
+            Id = _idProtector.Encode(project.Id),
+            ProjectName = project.ProjectName,
+            Description = project.Description,
+            Status = project.Status,
+            StartDate = project.StartDate,
+            EndDate = project.EndDate,
+            ProgressPercentage = project.ProgressPercentage,
+            CreatedAt = project.CreatedAt,
+            UpdatedAt = project.UpdatedAt
+        };
     }
 }

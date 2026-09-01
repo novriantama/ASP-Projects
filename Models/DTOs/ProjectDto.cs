@@ -2,7 +2,7 @@ namespace ASPProjects.Models.DTOs;
 
 public class ProjectDto
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = string.Empty;
     public string ProjectName { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string Status { get; set; } = string.Empty;

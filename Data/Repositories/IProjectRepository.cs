@@ -8,5 +8,5 @@ public interface IProjectRepository
     Task<Project?> GetByIdAsync(int id);
     Task<Project> AddAsync(Project project);
     Task UpdateAsync(Project project);
-    Task DeleteAsync(int id);
+    Task<bool> DeleteAsync(int id);
 }

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using ASPProjects.Database;
 using ASPProjects.Models.Entities;
 
@@ -12,28 +13,42 @@ public class ProjectRepository : IProjectRepository
         _context = context;
     }
 
-    public Task<IEnumerable<Project>> GetAllAsync()
+    public async Task<IEnumerable<Project>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Projects
+            .AsNoTracking()
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
     }
 
-    public Task<Project?> GetByIdAsync(int id)
+    public async Task<Project?> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _context.Projects.FindAsync(id);
     }
 
-    public Task<Project> AddAsync(Project project)
+    public async Task<Project> AddAsync(Project project)
     {
-        throw new NotImplementedException();
+        await _context.Projects.AddAsync(project);
+        await _context.SaveChangesAsync();
+        return project;
     }
 
-    public Task UpdateAsync(Project project)
+    public async Task UpdateAsync(Project project)
     {
-        throw new NotImplementedException();
+        _context.Projects.Update(project);
+        await _context.SaveChangesAsync();
     }
 
-    public Task DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        throw new NotImplementedException();
+        var project = await _context.Projects.FindAsync(id);
+        if (project == null)
+        {
+            return false;
+        }
+
+        _context.Projects.Remove(project);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

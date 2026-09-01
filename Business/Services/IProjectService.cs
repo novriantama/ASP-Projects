@@ -5,8 +5,8 @@ namespace ASPProjects.Business.Services;
 public interface IProjectService
 {
     Task<IEnumerable<ProjectDto>> GetAllProjectsAsync();
-    Task<ProjectDto?> GetProjectByIdAsync(int id);
+    Task<ProjectDto?> GetProjectByIdAsync(string encryptedId);
     Task<ProjectDto> CreateProjectAsync(CreateProjectDto dto);
-    Task<bool> UpdateProjectAsync(int id, UpdateProjectDto dto);
-    Task<bool> DeleteProjectAsync(int id);
+    Task<ProjectDto?> UpdateProjectAsync(string encryptedId, UpdateProjectDto dto);
+    Task<bool> DeleteProjectAsync(string encryptedId);
 }
